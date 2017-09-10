@@ -39,6 +39,7 @@ with open(file, "rb") as f:
     matches.append(bytes_read)
 
     """validate & print correct matches:"""
+    print('# {}: [start] [bytes]'.format(file))
     start_m_index = 0
     while start_m_index < len(matches) - 1:
         gzip_found = False
