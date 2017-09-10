@@ -16,5 +16,5 @@ This wil generate output like
 
 The output can be used for quick random files access to specific members:
 ```
-$ dd bs=1 skip={start_byte} count={length} if=infile.gz | gzip -dc
+$ dd bs=1 skip={start} count={bytes} if=infile.gz | gzip -dc
 ```
