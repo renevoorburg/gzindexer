@@ -6,7 +6,15 @@ Supply the file to be indexed as parameter:
 ```
 $ python3 gzindexer.py infile.gz
 ```
-This output can be used for quick random files access to specific members:
+
+This wil generate output like
+```
+# infile.gz: [start] [bytes]
+0 27677
+27677 676790
+```
+
+The output can be used for quick random files access to specific members:
 ```
 $ dd bs=1 skip={start_byte} count={length} if=infile.gz | gzip -dc
 ```
