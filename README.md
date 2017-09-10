@@ -1,6 +1,6 @@
 # gzindexer
 
-Creates an index of members of concatenated gzip files. Use it for quick and easy random file access.
+Creates an index of the members of concatenated gzip files (cf. [RFC 1952](https://tools.ietf.org/html/rfc1952) ). Use it for quick and easy random file access.
 
 Supply the file to be indexed as parameter:
 ```
