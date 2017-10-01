@@ -5,40 +5,44 @@ gzindexer
 Parses a gzip compressed file to output the byte locations ( {start_byte} {length} ) of the consecutive members.
 
 Supply the file to be indexed as parameter:
-$ python3 gzindexer.py infile.gz
+usage: python3 gzindexer.py [-h] [-x XPATH] filename
 
-This output can be used for quick random files access to specific members:
-$ dd bs=1 skip={start_byte} count={length} if=infile.gz | gzip -dc
+optional arguments:
+  -h, --help  show help message and exit
+  -x XPATH    add result of given XPATH expression to the index
 
-RV, 2017-09-14
+Th3 output can be used for quick random files access to specific members:
+$ dd bs=1 skip={start_byte} count={length} if=infile.gz | gzip -dce
+
+RV, 2017-10-01
 """
 
-import sys
 import gzip
 import io
 import os
+import argparse
+from lxml import etree
 
 gzip_magic = [b'\x1f', b'\x8b', b'\x08']
 
 magic_window = []
 matches = []
 
-try:
-    filename = sys.argv[1]
-except IndexError:
-    print("Please supply a filename.\n")
+parser = argparse.ArgumentParser(description='Creates an index for quick access to concatenated gzip files.')
+parser.add_argument('-x', action="store", dest="xpath", help="add result of given XPATH expression to index")
+parser.add_argument('filename', action="store")
+options = parser.parse_args()
+
+if not os.path.isfile(options.filename):
+    print("File {} not found.\n". format(options.filename))
     exit(1)
 
-if not os.path.isfile(filename):
-    print("File {} not found.\n". format(filename))
-    exit(1)
-
-if not os.access(filename, os.R_OK):
-    print("Cannot read file {} .\n". format(filename))
+if not os.access(options.filename, os.R_OK):
+    print("Cannot read file {} .\n". format(options.filename))
     exit(1)
 
 bytes_read = 0
-with open(filename, "rb") as f:
+with open(options.filename, "rb") as f:
     """ try to find gzip_magic matches: """
     byte = f.read(1)
     while byte:
@@ -52,7 +56,7 @@ with open(filename, "rb") as f:
     matches.append(bytes_read)
 
     """ validate & print correct matches: """
-    print('# {}: [start] [bytes]'.format(filename))
+    print('# {}: [start] [bytes]'.format(options.filename))
     start_m_index = 0
     while start_m_index < len(matches) - 1:
         gzip_found = False
@@ -63,12 +67,21 @@ with open(filename, "rb") as f:
             f.seek(start_byte)
             data = f.read(num_bytes)
             try:
-                gzip.open(io.BytesIO(data), 'rb').read()
+                content = gzip.open(io.BytesIO(data), 'rb').read()
             except OSError:
                 end_m_index += 1
                 continue
             gzip_found = True
             start_m_index = end_m_index
-            print("{} {}".format(start_byte, num_bytes))
+
+            if options.xpath is not None:
+                try:
+                    root = etree.fromstring(content)
+                    r = root.xpath(options.xpath)
+                    print("{} {} {}".format(start_byte, num_bytes, r[0]))
+                except:
+                    pass
+            else:
+                print("{} {}".format(start_byte, num_bytes))
         if not gzip_found:
             start_m_index += 1
