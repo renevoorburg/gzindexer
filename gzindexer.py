@@ -28,6 +28,8 @@ gzip_magic = [b'\x1f', b'\x8b', b'\x08']
 magic_window = []
 matches = []
 
+xmlparser = etree.XMLParser(recover=True)
+
 parser = argparse.ArgumentParser(description='Creates an index for quick access to concatenated gzip files.')
 parser.add_argument('-x', action="store", dest="xpath", help="add result of given XPATH expression to index")
 parser.add_argument('filename', action="store")
@@ -77,7 +79,7 @@ with open(options.filename, "rb") as f:
 
             if options.xpath is not None:
                 try:
-                    root = etree.fromstring(content)
+                    root = etree.fromstring(content, xmlparser)
                     r = root.xpath(options.xpath)
                     print(" {}".format(r[0]), end='')
                 except:
