@@ -73,15 +73,15 @@ with open(options.filename, "rb") as f:
                 continue
             gzip_found = True
             start_m_index = end_m_index
+            print("{} {}".format(start_byte, num_bytes), end='')
 
             if options.xpath is not None:
                 try:
                     root = etree.fromstring(content)
                     r = root.xpath(options.xpath)
-                    print("{} {} {}".format(start_byte, num_bytes, r[0]))
+                    print(" {}".format(r[0]), end='')
                 except:
                     pass
-            else:
-                print("{} {}".format(start_byte, num_bytes))
+            print()
         if not gzip_found:
             start_m_index += 1
