@@ -39,7 +39,7 @@ if not os.access(filename, os.R_OK):
 
 bytes_read = 0
 with open(filename, "rb") as f:
-    ''' try to find gzip_mapic matches: '''
+    """ try to find gzip_magic matches: """
     byte = f.read(1)
     while byte:
         magic_window.append(byte)
@@ -51,7 +51,7 @@ with open(filename, "rb") as f:
         bytes_read += 1
     matches.append(bytes_read)
 
-    '''validate & print correct matches:'''
+    """ validate & print correct matches: """
     print('# {}: [start] [bytes]'.format(filename))
     start_m_index = 0
     while start_m_index < len(matches) - 1:
@@ -64,10 +64,11 @@ with open(filename, "rb") as f:
             data = f.read(num_bytes)
             try:
                 gzip.open(io.BytesIO(data), 'rb').read()
-                gzip_found = True
-                start_m_index = end_m_index
-                print("{} {}".format(start_byte, num_bytes))
-            except:
+            except OSError:
                 end_m_index += 1
+                continue
+            gzip_found = True
+            start_m_index = end_m_index
+            print("{} {}".format(start_byte, num_bytes))
         if not gzip_found:
             start_m_index += 1
