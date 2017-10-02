@@ -11,7 +11,7 @@ optional arguments:
   -h, --help  show help message and exit
   -x XPATH    add result of given XPATH expression to the index
 
-Th3 output can be used for quick random files access to specific members:
+The output can be used for quick random files access to specific members:
 $ dd bs=1 skip={start_byte} count={length} if=infile.gz | gzip -dce
 
 RV, 2017-10-01
