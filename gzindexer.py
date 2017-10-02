@@ -64,19 +64,22 @@ with open(options.filename, "rb") as f:
         gzip_found = False
         end_m_index = start_m_index + 1
         while not (gzip_found or end_m_index >= len(matches)):
+
+            """ try to find a gzip segment at start_byte, length num_bytes """
             start_byte = matches[start_m_index]
             num_bytes = matches[end_m_index] - start_byte
             f.seek(start_byte)
             data = f.read(num_bytes)
             try:
                 content = gzip.open(io.BytesIO(data), 'rb').read()
-            except OSError:
+            except:
                 end_m_index += 1
                 continue
             gzip_found = True
             start_m_index = end_m_index
             print("{} {}".format(start_byte, num_bytes), end='')
 
+            """ try to apply the xpath, if set """
             if options.xpath is not None:
                 try:
                     root = etree.fromstring(content, xmlparser)
@@ -84,6 +87,7 @@ with open(options.filename, "rb") as f:
                     print(" {}".format(r[0]), end='')
                 except:
                     pass
+
             print()
         if not gzip_found:
             start_m_index += 1
