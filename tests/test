@@ -1,1 +1,0 @@
-python3 ../gzindexer.py -x '//*[local-name()=Item][1]/@*[local-name()=identifier]' xml-nserror.gz
