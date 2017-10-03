@@ -14,7 +14,7 @@ optional arguments:
 The output can be used for quick random files access to specific members:
 $ dd bs=1 skip={start_byte} count={length} if=infile.gz | gzip -dce
 
-RV, 2017-10-01
+RV, 2017-10-03
 """
 
 import gzip
@@ -57,8 +57,13 @@ with open(options.filename, "rb") as f:
         bytes_read += 1
     matches.append(bytes_read)
 
+
+    print('# {}: [start] [bytes]'.format(options.filename), end='')
+    if options.xpath is not None:
+        print(" [{}]".format(options.xpath), end='')
+    print()
+
     """ validate & print correct matches: """
-    print('# {}: [start] [bytes]'.format(options.filename))
     start_m_index = 0
     while start_m_index < len(matches) - 1:
         gzip_found = False
