@@ -89,7 +89,7 @@ with open(options.filename, "rb") as f:
                 try:
                     root = etree.fromstring(content, xmlparser)
                     r = root.xpath(options.xpath)
-                    print(" {}".format(r[0]), end='')
+                    print(" {}".format(r), end='')
                 except:
                     pass
 
