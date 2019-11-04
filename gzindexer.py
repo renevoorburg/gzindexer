@@ -14,9 +14,10 @@ optional arguments:
 The output can be used for quick random files access to specific members:
 $ dd bs=1 skip={start_byte} count={length} if=infile.gz | gzip -dce
 
-RV, 2017-10-03
+RV, 2019-11-03
 """
 
+from __future__ import print_function
 import gzip
 import io
 import os
@@ -57,42 +58,42 @@ with open(options.filename, "rb") as f:
         bytes_read += 1
     matches.append(bytes_read)
 
+print('# {}: [start] [bytes]'.format(options.filename), end='')
+if options.xpath is not None:
+    print(" [{}]".format(options.xpath), end='')
+print()
 
-    print('# {}: [start] [bytes]'.format(options.filename), end='')
-    if options.xpath is not None:
-        print(" [{}]".format(options.xpath), end='')
-    print()
+""" validate & print correct matches: """
+start_m_index = 0
+f = open(options.filename, "rb")
+while start_m_index < len(matches) - 1:
+    gzip_found = False
+    end_m_index = start_m_index + 1
+    while not (gzip_found or end_m_index >= len(matches)):
 
-    """ validate & print correct matches: """
-    start_m_index = 0
-    while start_m_index < len(matches) - 1:
-        gzip_found = False
-        end_m_index = start_m_index + 1
-        while not (gzip_found or end_m_index >= len(matches)):
+        """ try to find a gzip segment at start_byte, length num_bytes """
+        start_byte = matches[start_m_index]
+        num_bytes = matches[end_m_index] - start_byte
+        f.seek(start_byte)
+        data = f.read(num_bytes)
+        try:
+            content = gzip.open(io.BytesIO(data), 'rb').read()
+        except:
+            end_m_index += 1
+            continue
+        gzip_found = True
+        start_m_index = end_m_index
+        print("{} {}".format(start_byte, num_bytes), end='')
 
-            """ try to find a gzip segment at start_byte, length num_bytes """
-            start_byte = matches[start_m_index]
-            num_bytes = matches[end_m_index] - start_byte
-            f.seek(start_byte)
-            data = f.read(num_bytes)
+        """ try to apply the xpath, if set """
+        if options.xpath is not None:
             try:
-                content = gzip.open(io.BytesIO(data), 'rb').read()
+                root = etree.fromstring(content, xmlparser)
+                r = root.xpath(options.xpath)
+                print(" {}".format(r), end='')
             except:
-                end_m_index += 1
-                continue
-            gzip_found = True
-            start_m_index = end_m_index
-            print("{} {}".format(start_byte, num_bytes), end='')
+                pass
 
-            """ try to apply the xpath, if set """
-            if options.xpath is not None:
-                try:
-                    root = etree.fromstring(content, xmlparser)
-                    r = root.xpath(options.xpath)
-                    print(" {}".format(r), end='')
-                except:
-                    pass
-
-            print()
-        if not gzip_found:
-            start_m_index += 1
+        print()
+    if not gzip_found:
+        start_m_index += 1
